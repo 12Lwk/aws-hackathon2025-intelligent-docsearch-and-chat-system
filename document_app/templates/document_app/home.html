@@ -1,0 +1,78 @@
+{% extends 'document_app/base.html' %}
+{% load static %}
+
+{% block title %}Home{% endblock %}
+
+{% block style %}
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+
+{% block script %}
+    <script src="{% static 'js/home.js' %}?v=1"></script>
+{% endblock %}
+
+{% block content %}
+<div class="header-container">
+    <h1 class="rainbow-text">Welcome to ApaDocs</h1>
+    <p>Your intelligent document management system.</p>
+</div>
+
+<div class="card-container">
+    <div class="card">
+        <div class="card-icon">
+            <i class="fas fa-search"></i>
+        </div>
+        <h3>Search Documents</h3>
+        <p>Find documents quickly and easily with our powerful search engine.</p>
+        <a href="{% url 'search' %}" class="btn">Go to Search</a>
+    </div>
+    <div class="card">
+        <div class="card-icon">
+            <i class="fas fa-robot"></i>
+        </div>
+        <h3>AI Chatbot</h3>
+        <p>Interact with your documents using our intelligent AI chatbot.</p>
+        <a href="{% url 'chatbot' %}" class="btn">Go to Chatbot</a>
+    </div>
+    <!--<div class="card">
+        <div class="card-icon">
+            <i class="fas fa-chart-line"></i>
+        </div>
+        <h3>Dashboard</h3>
+        <p>Visualize your document analytics and gain valuable insights.</p>
+        <a href="{% url 'dashboard' %}" class="btn">Go to Dashboard</a>
+    </div>-->
+    <div class="card">
+        <div class="card-icon">
+            <i class="fas fa-upload"></i>
+        </div>
+        <h3>Upload Documents</h3>
+        <p>Upload and manage your documents with ease.</p>
+        <a href="{% url 'upload' %}" class="btn">Go to Upload</a>
+    </div>
+</div>
+
+<div class="recent-views-container">
+    <div class="recent-views-header">
+        <h2>Recent Views</h2>
+        <button id="clear-recent-views" class="btn-clear" title="Clear all recent views">
+            <i class="fas fa-trash"></i>
+        </button>
+    </div>
+    
+    <div id="recent-views-loading" class="loading-state" style="display: none;">
+        <div class="spinner"></div>
+        <p>Loading recent views...</p>
+    </div>
+    
+    <div id="recent-views-list" class="document-list">
+        <!-- Recent views will be dynamically loaded here -->
+    </div>
+    
+    <div id="no-recent-views" class="no-recent-views" style="display: none;">
+        <i class="fas fa-history"></i>
+        <p>No recent document views</p>
+        <small>Documents you view will appear here</small>
+    </div>
+</div>
+{% endblock %}

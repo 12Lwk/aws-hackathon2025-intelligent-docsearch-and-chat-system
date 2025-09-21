@@ -1,0 +1,47 @@
+{% extends 'document_app/base.html' %}
+{% load static %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block style %}
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="header-container">
+    <h1>Dashboard</h1>
+    <p>Overview of your document analytics.</p>
+</div>
+
+<div class="dashboard-grid">
+    <div class="chart-card">
+        <h3>Document Types</h3>
+        <canvas id="docTypeChart"></canvas>
+    </div>
+    <div class="chart-card">
+        <h3>Upload Frequency</h3>
+        <canvas id="uploadFrequencyChart"></canvas>
+    </div>
+    <div class="stats-card">
+        <div class="stat-item">
+            <div class="stat-icon"><i class="fas fa-file-alt"></i></div>
+            <div class="stat-info">
+                <h4>Total Documents</h4>
+                <p>1,234</p>
+            </div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-icon"><i class="fas fa-users"></i></div>
+            <div class="stat-info">
+                <h4>Active Users</h4>
+                <p>56</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{% static 'js/dashboard.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends 'document_app/base.html' %}
+{% load static %}
+
+{% block title %}Settings{% endblock %}
+
+{% block style %}
+    <link rel="stylesheet" href="{% static 'css/settings.css' %}?v=2">
+{% endblock %}
+
+{% block content %}
+<div class="settings-container">
+    <h2>Settings</h2>
+    <form class="settings-form">
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" value="current_user">
+        </div>
+        <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" value="user@example.com">
+        </div>
+        <div class="form-group">
+            <label for="password">New Password</label>
+            <input type="password" id="password">
+        </div>
+        <div class="form-group">
+            <label for="confirm-password">Confirm New Password</label>
+            <input type="password" id="confirm-password">
+        </div>
+        <div class="form-group">
+            <label>Theme</label>
+            <div class="theme-switcher">
+                <button class="theme-btn light-theme active" data-theme="light">Light</button>
+                <button class="theme-btn dark-theme" data-theme="dark">Dark</button>
+            </div>
+        </div>
+        <button type="submit" class="btn">Save Changes</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block script %}
+    <script src="{% static 'js/settings.js' %}"></script>
+{% endblock %}

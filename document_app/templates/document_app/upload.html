@@ -1,0 +1,194 @@
+{% extends 'document_app/base.html' %}
+{% load static %}
+
+{% block title %}Upload and Manage Files{% endblock %}
+
+{% block style %}
+    <link rel="stylesheet" href="{% static 'css/upload.css' %}?v=2">
+{% endblock %}
+
+{% block content %}
+<div class="upload-container">
+    <div class="upload-header">
+        <h2><i class="fas fa-upload"></i> Document Upload</h2>
+    </div>
+    
+    <!-- File Type Restrictions -->
+    <div class="file-restrictions">
+        <div class="restriction-item">
+            <i class="fas fa-file-pdf"></i>
+            <span>PDF</span>
+        </div>
+        <div class="restriction-note">
+            <i class="fas fa-info-circle"></i>
+            <span>Max 25 files, 10MB each</span>
+        </div>
+    </div>
+
+    <!-- Enhanced Upload Zone -->
+    <div class="upload-zone" id="upload-zone">
+        <div class="upload-content">
+            <div class="upload-icon">
+                <i class="fas fa-cloud-upload-alt"></i>
+            </div>
+            <h3>Drop files here or click to browse</h3>
+            <p>Select multiple files to upload at once</p>
+            <button class="browse-btn" id="browse-btn">
+                <i class="fas fa-folder-open"></i> Browse Files
+            </button>
+        </div>
+        <input type="file" id="file-input" multiple accept=".pdf,.png,.jpg,.jpeg,.doc,.docx" hidden>
+    </div>
+
+    <!-- Upload Progress & File List -->
+    <div class="upload-progress-section" id="upload-progress-section" style="display: none;">
+        <h3><i class="fas fa-tasks"></i> Upload Progress</h3>
+        <div class="overall-progress">
+            <div class="progress-bar">
+                <div class="progress-fill" id="overall-progress"></div>
+            </div>
+            <span class="progress-text" id="progress-text">0% Complete</span>
+        </div>
+    </div>
+
+    <!-- Uploaded Files Table -->
+    <div class="uploaded-files-section" id="uploaded-files-section" style="display: none;">
+        <div class="section-header">
+            <h3><i class="fas fa-list"></i> Uploaded Files</h3>
+            <div class="file-count">
+                <span id="file-count">0 files</span>
+            </div>
+        </div>
+        <div class="files-table-container">
+            <table class="files-table" id="files-table">
+                <thead>
+                    <tr>
+                        <th><i class="fas fa-file"></i> File Name</th>
+                        <th><i class="fas fa-clock"></i> Upload Time</th>
+                        <th><i class="fas fa-weight-hanging"></i> Size</th>
+                        <th><i class="fas fa-cog"></i> Status</th>
+                        <th><i class="fas fa-ellipsis-h"></i> Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="files-table-body">
+                    <!-- Dynamic file rows -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Notification -->
+<div class="toast" id="toast">
+    <div class="toast-content">
+        <i class="toast-icon"></i>
+        <span class="toast-message"></span>
+    </div>
+    <button class="toast-close" onclick="hideToast()">
+        <i class="fas fa-times"></i>
+    </button>
+</div>
+
+<div class="manage-container">
+    <div class="section-header">
+        <h2><i class="fas fa-folder-tree"></i> Document Categories</h2>
+        <div class="category-actions">
+            <button class="btn-secondary" id="refresh-folders-btn" onclick="refreshFolders()">
+                <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+        </div>
+    </div>
+    <div class="categories-grid" id="categories-grid">
+        <!-- Updated Category Cards with correct data-category values -->
+        <div class="category-card" data-category="policies_guidelines">
+            <div class="category-header" onclick="viewCategory('policies_guidelines')" style="cursor: pointer;">
+                <div class="category-info">
+                    <i class="fas fa-folder category-icon"></i>
+                    <div class="category-details">
+                        <h3>Policies & Guidelines</h3>
+                        <span class="file-count">0 files</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="category-card" data-category="operations_production">
+            <div class="category-header" onclick="viewCategory('operations_production')" style="cursor: pointer;">
+                <div class="category-info">
+                    <i class="fas fa-folder category-icon"></i>
+                    <div class="category-details">
+                        <h3>Operations & Production</h3>
+                        <span class="file-count">0 files</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="category-card" data-category="maintenance_technical">
+            <div class="category-header" onclick="viewCategory('maintenance_technical')" style="cursor: pointer;">
+                <div class="category-info">
+                    <i class="fas fa-folder category-icon"></i>
+                    <div class="category-details">
+                        <h3>Maintenance & Technical</h3>
+                        <span class="file-count">0 files</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="category-card" data-category="training_knowledge">
+            <div class="category-header" onclick="viewCategory('training_knowledge')" style="cursor: pointer;">
+                <div class="category-info">
+                    <i class="fas fa-folder category-icon"></i>
+                    <div class="category-details">
+                        <h3>Training & Knowledge</h3>
+                        <span class="file-count">0 files</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="category-card" data-category="others">
+            <div class="category-header" onclick="viewCategory('others')" style="cursor: pointer;">
+                <div class="category-info">
+                    <i class="fas fa-folder category-icon"></i>
+                    <div class="category-details">
+                        <h3>Others</h3>
+                        <span class="file-count">0 files</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="upload-status-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <h2>Upload Status</h2>
+        <div id="status-details">
+            <table id="file-upload-table">
+                <thead>
+                    <tr>
+                        <th>File Name</th>
+                        <th>Size</th>
+                        <th>Type</th>
+                        <th>Category</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- File rows will be added here dynamically -->
+                </tbody>
+            </table>
+            <p><strong>Upload Time:</strong> <span id="upload-time"></span></p>
+        </div>
+        <div class="modal-actions">
+            <button id="confirm-upload" class="btn">Confirm All</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+    <script src="{% static 'js/upload.js' %}?v=5"></script>
+{% endblock %}

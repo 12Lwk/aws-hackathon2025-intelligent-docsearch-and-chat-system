@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Intelligent Document System{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/base.css' %}?v=2">
+    {% block style %}{% endblock %}
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2 class="rainbow-text"><i class="fas fa-file-alt"></i> ApaDocs</h2>
+            <p class="powered-by">Powered by Apasia Intelligence</p>
+        </div>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'home' %}"><i class="fas fa-home"></i> Home</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'search' %}"><i class="fas fa-search"></i> Search</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'chatbot' %}"><i class="fas fa-robot"></i> AI Chatbot</a>
+            </li>
+            <!--<li class="nav-item">
+                <a class="nav-link" href="{% url 'dashboard' %}"><i class="fas fa-chart-line"></i> Dashboard</a>
+            </li>-->
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'upload' %}"><i class="fas fa-upload"></i> Upload</a>
+            </li>
+            <!--<li class="nav-item">
+                <a class="nav-link" href="{% url 'settings' %}"><i class="fas fa-cog"></i> Settings</a>
+            </li>-->
+        </ul>
+    </div>
+    <div class="main-content">
+        <header>
+            <div class="header-left">
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search...">
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="notification-icon">
+                    <!--<i class="fas fa-bell"></i>
+                    <span class="notification-badge">3</span>-->
+                </div>
+                <div class="user-info">
+                    <div class="user-profile-icon">U</div>
+                    <span>Welcome, User</span>
+                </div>
+            </div>
+        </header>
+        <main>
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+    <script src="{% static 'js/base.js' %}"></script>
+    {% block script %}{% endblock %}
+</body>
+</html>

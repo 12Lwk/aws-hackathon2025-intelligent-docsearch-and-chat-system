@@ -1,0 +1,100 @@
+.settings-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.main-content h2 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: var(--text-color); /* Dark text for light theme */
+    border-bottom: 1px solid var(--glass-border);
+    padding-bottom: 0.8rem;
+}
+
+.settings-form {
+    background: var(--glass-bg); /* Glass background */
+    padding: 2.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(15px) saturate(180%); /* Optimized blur */
+    -webkit-backdrop-filter: blur(15px) saturate(180%);
+    border: 1px solid var(--glass-border);
+}
+
+.form-group {
+    margin-bottom: 1.8rem;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 0.6rem;
+    color: var(--text-color);
+    font-size: 1.05rem;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.9rem 1.2rem;
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    font-size: 1rem;
+    background: rgba(0, 0, 0, 0.05); /* Light glass background for input */
+    color: var(--text-color); /* Dark text for light theme */
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-group input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+    outline: none;
+}
+
+.theme-switcher {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.theme-btn {
+    padding: 0.7rem 1.4rem;
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    cursor: pointer;
+    background: rgba(0, 0, 0, 0.05); /* Light glass background for buttons */
+    color: var(--text-color);
+    transition: all 0.3s ease;
+}
+
+.theme-btn.active {
+    background-color: var(--primary-color);
+    color: #FFFFFF;
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 15px rgba(0, 122, 255, 0.15);
+}
+
+.theme-btn:hover:not(.active) {
+    background-color: rgba(0, 0, 0, 0.1);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.btn {
+    background-color: var(--primary-color);
+    color: white; /* White text on primary button */
+    padding: 0.9rem 2.2rem;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    box-shadow: 0 6px 20px rgba(0, 122, 255, 0.15);
+    margin-top: 2rem;
+}
+
+.btn:hover {
+    background-color: #006ee6;
+    box-shadow: 0 8px 25px rgba(0, 122, 255, 0.2);
+    transform: translateY(-2px);
+}

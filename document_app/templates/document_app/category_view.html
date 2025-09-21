@@ -1,0 +1,171 @@
+{% extends 'document_app/base.html' %}
+{% load static %}
+
+{% block title %}{{ category_name }} - Document Categories{% endblock %}
+
+{% block style %}
+    <link rel="stylesheet" href="{% static 'css/category_view.css' %}?v=1">
+{% endblock %}
+
+{% block content %}
+<div class="category-view-container">
+    <!-- Breadcrumb Navigation -->
+    <nav class="breadcrumb-nav">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{% url 'upload' %}">
+                    <i class="fas fa-home"></i> Upload
+                </a>
+            </li>
+            <li class="breadcrumb-item active">
+                <i class="fas fa-folder"></i> {{ category_name }}
+            </li>
+        </ol>
+    </nav>
+
+    <!-- Category Header -->
+    <div class="category-header">
+        <div class="category-info">
+            <div class="category-icon-large">
+                <i class="{{ category_icon }}" style="color: {{ category_color }};"></i>
+            </div>
+            <div class="category-details">
+                <h1>{{ category_name }}</h1>
+                <p class="category-description">{{ category_description }}</p>
+                <div class="category-stats">
+                    <span class="stat-badge">
+                        <i class="fas fa-file"></i>
+                        <span id="total-documents">0</span> Documents
+                    </span>
+                    <span class="stat-badge">
+                        <i class="fas fa-clock"></i>
+                        Last updated: <span id="last-updated">Loading...</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="category-actions">
+            <button class="btn-secondary" onclick="testAPI()">
+                <i class="fas fa-bug"></i> Test API
+            </button>
+            <button class="btn-secondary" onclick="refreshDocuments()">
+                <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+            <button class="btn-primary" onclick="window.location.href='{% url 'upload' %}'">
+                <i class="fas fa-plus"></i> Upload More
+            </button>
+        </div>
+    </div>
+
+    <!-- Sorting and Filter Controls -->
+    <div class="controls-section">
+        <div class="sort-controls">
+            <label for="sort-select">
+                <i class="fas fa-sort"></i> Sort by:
+            </label>
+            <select id="sort-select" onchange="sortDocuments()">
+                <option value="upload_date_desc">Newest First</option>
+                <option value="upload_date_asc">Oldest First</option>
+                <option value="filename_asc">Name (A-Z)</option>
+                <option value="filename_desc">Name (Z-A)</option>
+                <option value="file_size_desc">Largest First</option>
+                <option value="file_size_asc">Smallest First</option>
+            </select>
+        </div>
+        
+        <div class="view-controls">
+            <label>
+                <i class="fas fa-eye"></i> View:
+            </label>
+            <div class="view-toggle">
+                <button class="view-btn active" data-view="grid" onclick="switchView('grid')">
+                    <i class="fas fa-th"></i> Grid
+                </button>
+                <button class="view-btn" data-view="list" onclick="switchView('list')">
+                    <i class="fas fa-list"></i> List
+                </button>
+            </div>
+        </div>
+        
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="search-input" placeholder="Search documents..." onkeyup="filterDocuments()">
+        </div>
+    </div>
+
+    <!-- Documents Container -->
+    <div class="documents-section">
+        <div class="loading-state" id="loading-state">
+            <div class="spinner"></div>
+            <p>Loading documents...</p>
+        </div>
+        
+        <div class="empty-state" id="empty-state" style="display: none;">
+            <i class="fas fa-folder-open"></i>
+            <h3>No documents found</h3>
+            <p>This category doesn't have any documents yet.</p>
+            <button class="btn-primary" onclick="window.location.href='{% url 'upload' %}'">
+                <i class="fas fa-plus"></i> Upload Documents
+            </button>
+        </div>
+        
+        <div class="documents-container" id="documents-container">
+            <!-- Documents will be loaded here -->
+        </div>
+    </div>
+</div>
+
+<!-- Document Actions Modal -->
+<div class="modal" id="document-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modal-title">Document Actions</h3>
+            <button class="close-btn" onclick="closeModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="document-preview" id="document-preview">
+                <!-- Document preview content -->
+            </div>
+            <div class="modal-actions">
+                <button class="btn-primary" id="download-btn">
+                    <i class="fas fa-download"></i> Download
+                </button>
+                <button class="btn-secondary" id="view-in-chat-btn">
+                    <i class="fas fa-comments"></i> Open in Chat
+                </button>
+                <button class="btn-danger" id="delete-btn">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Notification -->
+<div class="toast" id="toast">
+    <div class="toast-content">
+        <i class="toast-icon"></i>
+        <span class="toast-message"></span>
+    </div>
+    <button class="toast-close" onclick="hideToast()">
+        <i class="fas fa-times"></i>
+    </button>
+</div>
+{% endblock %}
+
+{% block script %}
+    <script>
+        // Pass category data to JavaScript
+        window.categoryData = {
+            category: '{{ category }}',
+            name: '{{ category_name }}',
+            icon: '{{ category_icon }}',
+            color: '{{ category_color }}'
+        };
+    </script>
+    <script src="{% static 'js/category_view.js' %}?v=1"></script>
+{% endblock %}

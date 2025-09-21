@@ -1,0 +1,500 @@
+{% extends 'document_app/base.html' %}
+{% load static %}
+
+{% block title %}AI Chatbot{% endblock %}
+
+{% block extra_head %}
+    <!-- Markdown rendering library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
+{% endblock %}
+
+{% block style %}
+    <link rel="stylesheet" href="{% static 'css/chatbot.css' %}">
+    <style>
+        .chat-container { max-width: 1600px; margin: 0 auto; height: 95vh; display: flex; flex-direction: column; }
+        .chat-header { text-align: center; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 10px; margin-bottom: 20px; }
+        .chat-messages { flex: 1; overflow-y: auto; padding: 20px; background: rgba(255,255,255,0.05); border-radius: 10px; margin-bottom: 20px; }
+        .message { margin: 15px 0; padding: 16px 20px; border-radius: 12px; max-width: 95%; line-height: 1.6; }
+        .message.user { background: linear-gradient(135deg, #007bff, #0056b3); color: white; margin-left: auto; max-width: 80%; }
+        .message.bot { 
+            background: rgba(255,255,255,0.9); 
+            margin-right: auto; 
+            word-wrap: break-word; 
+            max-width: 75%; 
+            color: #333 !important; 
+            border-radius: 18px; 
+            padding: 12px 16px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+        }
+        .message.bot-thinking { background: none; color: rgba(255,255,255,0.6); font-style: italic; margin-right: auto; }
+        .message.error { background: #dc3545; color: white; }
+        .chat-input { display: flex; gap: 10px; }
+        .chat-input input { flex: 1; padding: 12px 20px; border: 2px solid #000; border-radius: 25px; background: rgba(255,255,255,0.9); color: #333; font-size: 16px; }
+        .chat-input input::placeholder { color: rgba(0,0,0,0.5); }
+        .chat-input button { padding: 12px 24px; background: linear-gradient(135deg, #007bff, #0056b3); color: white; border: none; border-radius: 25px; cursor: pointer; }
+        .typing-indicator { display: none; padding: 10px; font-style: italic; color: rgba(255,255,255,0.7); text-align: center; }
+        .single-document { margin: 15px 0; }
+        .document-card { background: rgba(255,255,255,0.15); padding: 15px; border-radius: 10px; border-left: 4px solid #007bff; }
+        .document-card h4 { margin: 0 0 10px 0; color: #007bff; }
+        .document-card p { margin: 10px 0; font-size: 14px; line-height: 1.4; }
+        .message-content { white-space: normal; word-wrap: break-word; overflow-wrap: break-word; }
+        .message-content p { margin: 8px 0; line-height: 1.6; white-space: normal; }
+        .message-content ul, .message-content ol { padding-left: 20px; margin: 10px 0; }
+        .message-content li { margin-bottom: 6px; line-height: 1.4; white-space: normal; }
+        .message-content strong { font-weight: 600; }
+        .message-content em { font-style: italic; }
+        
+        /* Bot messages - dark text on light background */
+        .message.bot { color: #333; }
+        .message.bot .message-content { color: #333 !important; }
+        .message.bot .message-content p { color: #333 !important; }
+        .message.bot .message-content li { color: #333 !important; }
+        .message.bot .message-content strong { color: #000 !important; }
+        .message.bot .message-content em { color: #555 !important; }
+        
+        /* User messages - white text on blue background */
+        .message.user { color: #fff; }
+        .message.user .message-content { color: #fff !important; }
+        .message.user .message-content p { color: #fff !important; }
+        .message.user .message-content li { color: #fff !important; }
+        .message.user .message-content strong { color: #fff !important; }
+        .message.user .message-content em { color: rgba(255,255,255,0.9) !important; }
+        .message-content h1, .message-content h2, .message-content h3 { margin: 12px 0 8px 0; color: #007bff; }
+        .message-content br { line-height: 1.8; }
+        .message-content .suggestion-list { margin: 10px 0; }
+        .message-content .suggestion-item { margin: 5px 0; padding-left: 10px; }
+        .document-meta { margin: 10px 0; }
+        .document-meta small { color: rgba(255,255,255,0.7); }
+        .document-actions { margin-top: 15px; display: flex; gap: 10px; }
+        .btn-view, .btn-download { padding: 8px 16px; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; }
+        .btn-view { background: #28a745; color: white; }
+        .btn-download { background: #007bff; color: white; }
+        .btn-view:hover, .btn-download:hover { opacity: 0.8; }
+        
+        /* Hide the top header bar only on chatbot page */
+        header { display: none !important; }
+        
+        /* Adjust main content to fill the space */
+        .main-content { 
+            padding-top: 0 !important; 
+            height: 100vh !important; 
+            overflow: hidden !important; 
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="chat-container">
+    <div class="chat-header">
+        <h2 class="rainbow-text">AI Document Assistant</h2>
+        <p>Ask me anything about your documents - I'll search, analyze, or help you upload files</p>
+    </div>
+    
+    <div class="chat-messages" id="chat-messages">
+        <div class="message bot">
+            <p>Hello! I can help you search documents, analyze content, or upload files. What do you need?</p>
+        </div>
+    </div>
+    
+    <div class="typing-indicator" id="typing-indicator">
+        AI is thinking...
+    </div>
+    
+    <div class="chat-input">
+        <input type="text" id="message-input" placeholder="Type your message..." onkeypress="handleKeyPress(event)">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+</div>
+
+<script>
+let isTyping = false;
+let lastFoundDocument = null; // The chatbot's memory for the last found document
+let lastAIResponse = null; // Memory for the last thing the AI said
+
+function isFollowUpQuestion(message) {
+    const followUpKeywords = ['analyze', 'summarize', 'explain', 'what are', 'provide', 'give me', 'this file', 'the steps', 'troubleshooting'];
+    const messageLower = message.toLowerCase();
+    return followUpKeywords.some(keyword => messageLower.includes(keyword));
+}
+
+async function sendMessage() {
+    const input = document.getElementById('message-input');
+    const message = input.value.trim();
+    if (!message || isTyping) return;
+    
+    addMessage(message, 'user');
+    input.value = '';
+
+    // If this is a follow-up question, show a more specific typing indicator
+    if (lastFoundDocument && isFollowUpQuestion(message)) {
+        addMessage(`🤖 _Reading the '${lastFoundDocument.title}' document to find the answer..._`, 'bot-thinking');
+    }
+    showTyping();
+    
+    try {
+        const response = await fetch('/api/chatbot/', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({message, context: { document: lastFoundDocument, lastResponse: lastAIResponse }})
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Server error (${response.status})`);
+        }
+        
+        const data = await response.json();
+        hideTyping();
+        handleResponse(data);
+    } catch (error) {
+        hideTyping();
+        console.error('Chatbot error:', error);
+        if (error.message.includes('Failed to fetch')) {
+            addMessage('❌ Connection error: Unable to reach the server. Please check your internet connection.', 'error');
+        } else {
+            addMessage('❌ Error: ' + error.message + '. Please try again.', 'error');
+        }
+    }
+}
+
+function handleResponse(data) {
+    if (data.error) {
+        addMessage('❌ ' + data.error, 'error');
+        return;
+    }
+    
+    // Remove the 'thinking' message before adding the final response
+    const thinkingMessage = document.querySelector('.message.bot-thinking');
+    if (thinkingMessage) {
+        thinkingMessage.remove();
+    }
+
+    addMessage(data.response, 'bot');
+    lastAIResponse = data.response; // Remember the AI's latest response
+
+    // When a new search is successful, clear the previous AI response history
+    if (data.type === 'search' && data.document) {
+        lastAIResponse = null;
+    }
+    
+    if (data.type === 'search') {
+        if (data.document && data.document.id) {
+            displaySingleDocument(data.document);
+        } else {
+            // Provide helpful suggestions when no documents are found
+            addMessage('💡 Search tips: Try using specific keywords, check document categories, or upload documents if none exist.', 'bot');
+        }
+    }
+    
+    if (data.sources && data.sources.length > 0) {
+        addMessage(`📚 Sources: ${data.sources.join(', ')}`, 'bot');
+    }
+}
+
+function displaySingleDocument(doc) {
+    // When a new document is displayed, update the chatbot's memory
+    lastFoundDocument = {
+        id: doc.id,
+        title: doc.title,
+        content: doc.full_content || doc.excerpt, // Prefer full content if available
+        attributes: doc.attributes
+    };
+    console.log("Chatbot memory updated with document:", lastFoundDocument.title);
+    if (!doc || !doc.id) {
+        console.error('Invalid document object:', doc);
+        return;
+    }
+    
+    const container = document.getElementById('chat-messages');
+    const docDiv = document.createElement('div');
+    docDiv.className = 'single-document';
+    
+    const docId = doc.id;
+    const docTitle = (doc.title || 'Unknown Document').replace(/'/g, '&apos;');
+    const docExcerpt = doc.excerpt || 'No preview available';
+    const docCategory = doc.category || 'Unknown';
+    const docScore = doc.score || 0;
+    
+    // Debug logging
+    console.log('Displaying document:', {
+        id: docId,
+        title: docTitle,
+        excerpt: docExcerpt.substring(0, 50) + '...'
+    });
+    
+    docDiv.innerHTML = `
+        <div class="document-card">
+            <h4>📄 ${docTitle}</h4>
+            <p>${docExcerpt}</p>
+            <div class="document-meta">
+                <small>Category: ${docCategory} | Relevance: ${Math.round(docScore * 100)}%</small>
+            </div>
+            <div class="document-actions">
+                <button class="btn-view" data-doc-id="${docId}" data-doc-title="${docTitle}">👁️ View Details</button>
+                <button class="btn-download" data-doc-id="${docId}" data-doc-title="${docTitle}">📊 Info</button>
+            </div>
+        </div>
+    `;
+    
+    // Add event listeners after DOM insertion
+    container.appendChild(docDiv);
+    
+    const viewBtn = docDiv.querySelector('.btn-view');
+    const downloadBtn = docDiv.querySelector('.btn-download');
+    
+    if (viewBtn) {
+        viewBtn.addEventListener('click', (e) => {
+            const buttonDocId = e.target.getAttribute('data-doc-id');
+            const buttonDocTitle = e.target.getAttribute('data-doc-title');
+            console.log('View button clicked for document ID:', buttonDocId);
+            viewDocument(buttonDocId);
+        });
+    }
+    if (downloadBtn) {
+        downloadBtn.addEventListener('click', (e) => {
+            const buttonDocId = e.target.getAttribute('data-doc-id');
+            const buttonDocTitle = e.target.getAttribute('data-doc-title');
+            console.log('Download button clicked for document ID:', buttonDocId);
+            downloadDocument(buttonDocId, buttonDocTitle);
+        });
+    }
+    
+    container.scrollTop = container.scrollHeight;
+}
+
+async function viewDocument(docId) {
+    try {
+        addMessage('🔍 Retrieving document content...', 'bot');
+        console.log('Attempting to view document ID:', docId);
+        
+        // Show loading indicator
+        showTyping();
+        
+        // Use query parameters to avoid URL routing issues with S3 URLs
+        const response = await fetch(`/api/documents/view/?id=${encodeURIComponent(docId)}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+        
+        hideTyping();
+        
+        if (!response.ok) {
+            if (response.status === 404) {
+                addMessage('❌ Document not found. It may have been deleted or the ID is incorrect.', 'error');
+            } else {
+                addMessage(`❌ Server error (${response.status}). Please try again later.`, 'error');
+            }
+            return;
+        }
+        
+        const data = await response.json();
+        
+        // Debug logging
+        console.log('Received document data:', data);
+        console.log('Content length:', data.content ? data.content.length : 0);
+        console.log('Content preview:', data.content ? data.content.substring(0, 100) : 'No content');
+        
+        if (data.error) {
+            addMessage('❌ ' + data.error, 'error');
+            addMessage('💡 Try searching for the document again or check if it was uploaded successfully.', 'bot');
+            return;
+        }
+        
+        // Display content directly in chat
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'document-viewer';
+        contentDiv.innerHTML = `
+            <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin: 10px 0; max-height: 400px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.2);">
+                <h4 style="color: #007bff; margin: 0 0 10px 0;">📄 ${data.title || 'Document'}</h4>
+                <div class="ai-summary" style="background: rgba(0,0,0,0.1); padding: 12px; border-radius: 8px; margin: 12px 0;">
+                    <strong style="color: #0099ff;">🤖 AI Summary:</strong>
+                    <p style="margin: 5px 0 0 0; font-style: italic;">${data.summary || 'AI analysis could not be performed.'}</p>
+                </div>
+                <p style="margin: 8px 0;"><strong>Category:</strong> <span style="background: rgba(0,0,0,0.2); padding: 3px 8px; border-radius: 12px; font-size: 12px;">${data.category || 'Unknown'}</span></p>
+                <div class="keywords-container" style="margin-top: 10px;">
+                    <strong>Keywords:</strong>
+                    <div class="keywords" style="display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px;">
+                        ${(data.keywords && data.keywords.length > 0) ? 
+                            data.keywords.map(kw => `<span style="background: rgba(0,0,0,0.2); padding: 3px 8px; border-radius: 12px; font-size: 12px;">${kw}</span>`).join('') : 
+                            '<em>No keywords identified</em>'}
+                    </div>
+                </div>
+                <hr style="margin: 15px 0; border-color: rgba(255,255,255,0.3);">
+                <div class="raw-text-container">
+                    <button onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none';" 
+                            style="background: rgba(0,0,0,0.2); border: none; color: white; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px;">
+                        Show/Hide Raw Text Preview
+                    </button>
+                    <div class="raw-text-preview" style="display: none; white-space: pre-wrap; font-family: 'Courier New', monospace; font-size: 13px; max-height: 200px; overflow-y: auto; background: rgba(0,0,0,0.1); padding: 10px; border-radius: 5px; margin-top: 10px;">
+                        ${data.content && data.content.trim() && data.content !== 'No content available' ? 
+                            data.content : 
+                            'No raw text available for preview.'}
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.getElementById('chat-messages').appendChild(contentDiv);
+        document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
+        
+        addMessage('✅ Document content displayed above. Use the download button to get the full file.', 'bot');
+        
+    } catch (error) {
+        hideTyping();
+        console.error('View error:', error);
+        addMessage('❌ Network error: Unable to retrieve document. Please check your connection and try again.', 'error');
+    }
+}
+
+async function downloadDocument(docId, title) {
+    try {
+        addMessage('📥 Preparing download...', 'bot');
+        console.log('Attempting to download document ID:', docId);
+        
+        showTyping();
+        
+        // Use query parameters to avoid URL routing issues with S3 URLs
+        const response = await fetch(`/api/documents/download/?id=${encodeURIComponent(docId)}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+        
+        hideTyping();
+        
+        if (!response.ok) {
+            if (response.status === 404) {
+                addMessage('❌ Original file not found. This document may be text-only or the file was not preserved.', 'error');
+                addMessage('💡 You can still view the document content using the "View Details" button.', 'bot');
+            } else {
+                addMessage(`❌ Download failed (${response.status}). Please try again later.`, 'error');
+            }
+            return;
+        }
+        
+        const data = await response.json();
+        
+        if (data.error) {
+            addMessage('❌ ' + data.error, 'error');
+            if (data.error.includes('S3') || data.error.includes('not available')) {
+                addMessage('💡 This document may be stored as text-only. Use "View Details" to see the content.', 'bot');
+            }
+            return;
+        }
+        
+        if (data.download_url) {
+            // Handle different download types
+            if (data.is_text_only) {
+                // For text-only downloads, create a blob and download
+                const link = document.createElement('a');
+                link.href = data.download_url;
+                link.download = data.filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                addMessage('✅ Text version downloaded: ' + data.filename, 'bot');
+                addMessage('📄 ' + (data.note || 'Original file format not available, downloaded as text.'), 'bot');
+            } else {
+                // For S3 downloads, open in new tab
+                window.open(data.download_url, '_blank');
+                addMessage('✅ Download started for: ' + (data.filename || title), 'bot');
+                addMessage('📁 The file will download to your default Downloads folder.', 'bot');
+            }
+        } else {
+            addMessage('❌ Download URL not available', 'error');
+            addMessage('💡 Try using "View Details" to see the document content instead.', 'bot');
+        }
+        
+    } catch (error) {
+        hideTyping();
+        console.error('Download error:', error);
+        addMessage('❌ Network error: Unable to download document. Please check your connection and try again.', 'error');
+    }
+}
+
+function handleKeyPress(event) {
+    if (event.key === 'Enter' && !isTyping) {
+        sendMessage();
+    }
+}
+
+function showTyping() {
+    isTyping = true;
+    document.getElementById('typing-indicator').style.display = 'block';
+    document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
+}
+
+function hideTyping() {
+    isTyping = false;
+    document.getElementById('typing-indicator').style.display = 'none';
+}
+
+function addMessage(text, type) {
+    const messages = document.getElementById('chat-messages');
+    const div = document.createElement('div');
+    div.className = `message ${type}`;
+
+    // Create a container for the message content
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'message-content';
+
+    if (type === 'bot' || type === 'bot-thinking') {
+        // For bot messages, handle line breaks and formatting properly
+        const converter = new showdown.Converter({
+            simplifiedAutoLink: true,
+            excludeTrailingPunctuationFromURLs: true,
+            strikethrough: true,
+            simpleLineBreaks: true,
+            openLinksInNewWindow: true,
+            headerLevelStart: 3
+        });
+        
+        // Convert only explicit line breaks and handle special formatting
+        let formattedText = text
+            .replace(/\\n\\n/g, '\n\n')  // Convert double \n to paragraph breaks
+            .replace(/\\n/g, ' ')        // Convert single \n to spaces (no line break)
+            .replace(/\n\n/g, '\n\n')    // Preserve actual double newlines (paragraph breaks)
+            .replace(/•/g, '•')      // Ensure bullet points display correctly
+            .replace(/💡/g, '💡')  // Ensure emojis display correctly
+            .replace(/📖/g, '📖')
+            .replace(/🔊/g, '🔊');
+        
+        // Only add line breaks before section headers and after double newlines
+        formattedText = formattedText
+            .replace(/(💡 \*\*You might also want to ask:\*\*)/g, '\n\n$1\n')
+            .replace(/(📖 \*Say)/g, '\n\n$1')
+            .replace(/(🔊 \*)/g, '\n$1');
+        
+        contentDiv.innerHTML = converter.makeHtml(formattedText);
+        
+        // Post-process to ensure proper formatting
+        const listItems = contentDiv.querySelectorAll('li');
+        listItems.forEach(li => {
+            li.style.marginBottom = '6px';
+            li.style.lineHeight = '1.4';
+            li.style.whiteSpace = 'normal';  // Ensure normal text flow within list items
+        });
+        
+        // Ensure paragraphs have proper spacing
+        const paragraphs = contentDiv.querySelectorAll('p');
+        paragraphs.forEach(p => {
+            p.style.whiteSpace = 'normal';  // Ensure normal text flow within paragraphs
+            p.style.marginBottom = '8px';
+        });
+        
+    } else {
+        // For user messages, just use a paragraph tag
+        const p = document.createElement('p');
+        p.textContent = text;
+        contentDiv.appendChild(p);
+    }
+
+    div.appendChild(contentDiv);
+    messages.appendChild(div);
+    messages.scrollTop = messages.scrollHeight;
+}
+</script>
+{% endblock %}

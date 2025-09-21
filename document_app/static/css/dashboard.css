@@ -1,0 +1,85 @@
+/* Dashboard styles */
+.header-container {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.header-container h1 {
+    font-size: 2.8rem;
+    font-weight: 700;
+    color: var(--text-color); /* Dark text for light theme */
+    text-shadow: none; /* Remove glow for light theme */
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.chart-card, .stats-card {
+    background: var(--glass-bg); /* Glass background */
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(15px) saturate(180%); /* Optimized blur */
+    -webkit-backdrop-filter: blur(15px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    position: relative;
+    overflow: hidden;
+}
+
+.chart-card:hover, .stats-card:hover {
+    transform: translateY(-8px) scale(1.01);
+    box-shadow: 0 12px 40px rgba(0, 122, 255, 0.1), var(--shadow); /* Lighter shadow */
+}
+
+.chart-card h3, .stats-card h3 {
+    font-size: 1.6rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: var(--text-color); /* Dark text for light theme */
+    text-align: center;
+}
+
+.stats-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    background: rgba(0, 0, 0, 0.05); /* Inner glass for stat items */
+    padding: 1rem;
+    border-radius: 12px;
+    border: 1px solid var(--glass-border);
+}
+
+.stat-item:last-child {
+    margin-bottom: 0;
+}
+
+.stat-icon {
+    font-size: 2.8rem;
+    color: var(--primary-color);
+    margin-right: 1.5rem;
+    text-shadow: none; /* Remove glow for light theme */
+}
+
+.stat-info h4 {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--text-color);
+    margin: 0 0 0.25rem 0;
+}
+
+.stat-info p {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--text-color); /* Dark text for light theme */
+}

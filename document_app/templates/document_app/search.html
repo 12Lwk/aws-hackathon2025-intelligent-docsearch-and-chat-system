@@ -1,0 +1,46 @@
+{% extends 'document_app/base.html' %}
+{% load static %}
+
+{% block title %}AI Search - ApaDocs{% endblock %}
+
+{% block style %}
+    <link rel="stylesheet" href="{% static 'css/search.css' %}?v=2">
+{% endblock %}
+
+{% block content %}
+<div class="search-page-container">
+    <div class="search-header-section">
+        <h1 class="rainbow-text">ApaDocs AI Search</h1>
+        <p>Unlock the power of AI to search your documents.</p>
+    </div>
+
+    <div class="search-box-section">
+        <div class="search-bar-wrapper">
+            <input type="text" id="search-input" placeholder="Ask a question or search by keyword...">
+            <button id="search-button"><i class="fas fa-search"></i></button>
+        </div>
+        <div class="ai-suggestions">
+            <span>Try:</span>
+            <a href="#" class="suggestion-chip">"Find safety procedures"</a>
+            <a href="#" class="suggestion-chip">"Search maintenance manual"</a>
+            <a href="#" class="suggestion-chip">"Show training materials"</a>
+            <a href="#" class="suggestion-chip">"Find policy documents"</a>
+            <a href="#" class="suggestion-chip">"Search troubleshooting guide"</a>
+        </div>
+    </div>
+
+    <div class="results-section">
+        <div id="loading-indicator" class="hidden">
+            <div class="spinner"></div>
+            <p>ApaDocs AI is thinking...</p>
+        </div>
+        <div id="search-results">
+            <!-- Search results will be dynamically inserted here -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+    <script src="{% static 'js/search.js' %}?v=2"></script>
+{% endblock %}
