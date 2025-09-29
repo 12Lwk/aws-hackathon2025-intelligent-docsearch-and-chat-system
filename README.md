@@ -175,7 +175,7 @@ graph TB
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/12Lwk/aws-hackathon-intelligent-docsearch-and-chat-system.git
+   git clone https://github.com/12Lwk/aws-hackathon2025-intelligent-docsearch-and-chat-system.git
    cd aws-hackathon-intelligent-docsearch-and-chat-system-s3-dynamodb-pipeline
    ```
 
@@ -295,10 +295,6 @@ aws-hackathon-intelligent-docsearch-and-chat-system/
 3. Commit your changes (`git commit -m 'Add amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🙏 Acknowledgments
 
